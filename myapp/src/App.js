@@ -5,41 +5,75 @@ import './App.css';
 
 const App = () => {
 
-  const [users, setUsers] = useState([]);
+  const guestData = { "data": [
+    {
+      "id":0,
+      "name":"Guest",
+      "address":"No address on file",
+      "email":"",
+      "strideLength":0,
+      "dailyStepGoal":0,
+      "friends":[0]
+    }
+  ]}
+
+  const [users, setUsers] = useState([]);  
+  const [Id, setId] = useState(guestData["data"][0].id);
+  const [name, setName] = useState(guestData["data"][0].name);
+  const [friends, setFriends] = useState(guestData["data"][0].friends);
+  const [email, setEmail] = useState(guestData["data"][0].email);
   const [hasError, setErrors] = useState(false);
+ 
 
   useEffect(() => {
     async function fetchData() {
       const res = await fetch('http://localhost:3000/users');
+
       res
       .json()
       .then(res => setUsers(res))
+      .then(res => setId(res[0].Id))
       .catch(err => setErrors(err));
     }
 
     fetchData();
-  });
+  }, []);
 
-  const renderUsers = () =>{
-    if (users.length <= 0){
-      return <div>Loading..</div>
+  const userChange = event =>{
+    const stringEvent = event.target.value;
+    const eventTarget = parseInt(stringEvent);
+    
+    if (eventTarget > 0 && eventTarget < users["data"].length){
+      let userResultArray = users["data"].filter(x=>(x.id === eventTarget));
+      let userResultId = userResultArray[0].id;
+      let userResultEmail = userResultArray[0].email;
+      const userResultFriendsId = userResultArray[0].friends;
+      const userResultName = userResultArray[0].name;
+      setId(userResultId);
+      setEmail(userResultEmail);
+      setFriends(userResultFriendsId);
+      setName(userResultName);
     }else{
-      return (
-        users.map((val, key) => {
-          return (
-          <div key={key}>
-            {val.name} | {val.age}
-          </div>
-          );
-        })
-      )
-    }
+      setId(guestData["data"][0].id);
+      setName(guestData["data"][0].name);
+      setEmail(guestData["data"][0].email);
+      
+    };
+
   };
 
   return(
     <div className="App">
-      {renderUsers()}
-      {JSON.stringify(users)}
+      <Input
+        value={Id}
+        onChangeInput={userChange}
+      >
+      Login ID:
+      </Input><br></br>
+      Name {name}<br></br>
+      ID {Id} <br></br>
+      Email: {email} <br></br>
+      Friends {friends} <br></br>
       <span>Has error: {JSON.stringify(hasError)}</span>
     </div>
 
@@ -47,48 +81,19 @@ const App = () => {
   
 };
 
-// class App extends Component {
-//   constructor(props){
-//     super(props);
-//     this.state= {
-//       users: []
-//     }
-//   }
 
-//   componentDidMount(){
-//     fetch('http://localhost:3000/users')
-//       .then(response => response.json())
-//       .then(res => {
-//         if (res && res.data){
-//           this.setState({ users: [...this.state.users, ...res.data]})
-//         }
-//       });
-//   }
-
-//   renderUsers(){
-//     if (this.state.users.length <= 0){
-//       return <div>Loading..</div>
-//     }else{
-//       return (
-//         this.state.users.map((val, key) => {
-//           return (
-//           <div key={key}>
-//             {val.name} | {val.age}
-//           </div>);
-//         })
-//       )
-//     }
-//   }
-
-//   render(){
-//     return(
-
-//     <div className="App">
-//       { this.renderUsers() }
-//     </div>
-
-//     );
-//   }
-// }
+const Input = ({value, onChangeInput, children}) => (
+  <label
+    className="inputLabel"
+  >
+    {children}
+    <input
+      type="number"
+      value={value}
+      onChange={onChangeInput}
+      className="inputNum"
+      />
+  </label>
+);
 
 export default App;
